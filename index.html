@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Screen Background with Sliding Iframe</title>
+    <title>Full Screen Iframe Toggle</title>
     <style>
         /* --- General Reset and Full-Screen Background Styles --- */
         html, body {
@@ -11,7 +11,7 @@
             width: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* No scrolling allowed */
+            overflow: hidden; /* No scrolling allowed on the main page */
         }
 
         body {
@@ -23,51 +23,47 @@
             position: relative; 
         }
 
-        /* --- Main Wrapper for the Iframe and Button (Fixed to Bottom) --- */
-        #main-wrapper {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            text-align: center; /* Centers items inside the wrapper */
-        }
-
-        /* --- Button Styles (Always visible) --- */
+        /* --- Button Styles (Fixed bottom-right, always visible) --- */
         #toggle-button {
+            position: fixed; /* Fixes the button relative to the viewport */
+            bottom: 20px;    /* Position 20px from the bottom */
+            right: 20px;     /* Position 20px from the right */
             padding: 10px 20px;
             cursor: pointer;
             background-color: #333;
             color: white;
             border: none;
-            border-radius: 5px 5px 0 0;
-            z-index: 10;
-            /* Ensure good contrast for accessibility (example color choice) */
+            border-radius: 5px;
+            z-index: 20; /* Ensures the button is above everything else */
         }
         
-        /* Add focus style for keyboard navigation accessibility */
         #toggle-button:focus-visible {
             outline: 2px solid dodgerblue; 
             outline-offset: 2px;
         }
 
-        /* --- Iframe Container Styles --- */
+        /* --- Iframe Container Styles (Initially hidden/off-screen) --- */
         #iframe-container {
-            width: 80%; 
-            height: 50vh; 
-            background-color: rgba(255, 255, 255, 0.9); 
-            margin: 0 auto; 
+            /* Start off-screen */
+            position: fixed; 
+            top: 100%; /* Initially below the viewport */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white; /* Solid background when visible */
             overflow: hidden; 
             
-            /* CSS Transition properties */
-            transform: translateY(100%); 
-            transition: transform 0.5s ease-out; 
+            /* Smooth transition when changing position */
+            transition: top 0.5s ease-out;
 
-            /* Performance hint for the browser */
-            will-change: transform;
+            /* Performance hint */
+            will-change: top;
+            z-index: 10; /* Below the button's z-index */
         }
 
         /* Class added by JavaScript to make it visible */
         #iframe-container.is-visible {
-            transform: translateY(0); 
+            top: 0; /* Slides up to cover the full viewport (top: 0, height: 100%) */
         }
 
         /* --- Iframe Element Styles --- */
@@ -75,40 +71,39 @@
             width: 100%;
             height: 100%;
             border: none; 
+            /* Ensure iframes allow fullscreen functionality for embedded content like videos */
+            allow: "fullscreen";
+            /* Replace 'https://example.com' with your target URL */
+            src: "https://example.com"; 
         }
     </style>
 </head>
 <body>
 
-    <div id="main-wrapper">
-        <!-- Added ARIA attributes for accessibility -->
-        <button id="toggle-button" onclick="toggleIframe()" aria-expanded="false" aria-controls="iframe-container">
-            Show Iframe
-        </button>
+    <!-- The button remains fixed on the screen -->
+    <button id="toggle-button" onclick="toggleIframe()" aria-expanded="false" aria-controls="iframe-container">
+        Show Fullscreen
+    </button>
 
-        <div id="iframe-container">
-            <!-- Iframe content goes here. Replace the src with your actual URL. -->
-            <iframe id="content-frame" src="https://example.com" title="External Content Frame"></iframe>
-        </div>
+    <!-- The container covers the full screen when active -->
+    <div id="iframe-container">
+        <iframe id="content-frame" title="External Content Frame"></iframe>
     </div>
 
     <script>
-        // JavaScript function to handle the toggle action
         function toggleIframe() {
             const container = document.getElementById('iframe-container');
             const button = document.getElementById('toggle-button');
             
-            // Toggle the visibility class
             container.classList.toggle('is-visible');
 
-            // Update button text and ARIA attributes based on the new state
             const isVisible = container.classList.contains('is-visible');
             
             if (isVisible) {
-                button.textContent = 'Hide Iframe';
+                button.textContent = 'Hide Fullscreen';
                 button.setAttribute('aria-expanded', 'true');
             } else {
-                button.textContent = 'Show Iframe';
+                button.textContent = 'Show Fullscreen';
                 button.setAttribute('aria-expanded', 'false');
             }
         }
